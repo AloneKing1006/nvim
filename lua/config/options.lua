@@ -16,6 +16,7 @@ vim.opt.smartcase = true
 vim.opt.termguicolors = true
 vim.opt.background = "dark"
 vim.opt.signcolumn = "yes"
+vim.opt.winborder = "rounded"
 
 -- indentation
 vim.opt.smartindent = true
@@ -24,6 +25,8 @@ vim.opt.smartindent = true
 vim.opt.wrap = false
 vim.opt.swapfile = false
 vim.opt.backup = false
+vim.opt.undofile = true
+vim.opt.undodir = vim.fn.expand("~/.cache/nvim/undodir")
 
 -- cursorline
 vim.opt.cursorline = true

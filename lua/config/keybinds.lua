@@ -21,3 +21,5 @@ vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
 vim.keymap.set("n", "n", "nzzzv")       -- center screen when looping search results
 vim.keymap.set("n", "N", "Nzzzv")
+
+vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle) -- open close undotree
