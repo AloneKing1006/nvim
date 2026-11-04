@@ -1,4 +1,5 @@
-No Bloat Neovim
+## No Bloat Neovim
+
 minimal neovim, no external plugin manager, native tree-sitter
 
 ## Keybinds
