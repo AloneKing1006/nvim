@@ -10,6 +10,7 @@ vim.pack.add({
     "https://github.com/nvim-telescope/telescope.nvim",
     "https://github.com/nvim-lua/plenary.nvim",
     "https://github.com/mbbill/undotree",
+    "https://github.com/hrsh7th/cmp-nvim-lsp",
 })
 
 -- tokyonight
@@ -24,3 +25,5 @@ require("plugins.treesitter")
 require("plugins.cmp")
 -- telescope
 require("plugins.telescope")
+-- lsp
+require("plugins.lsp")

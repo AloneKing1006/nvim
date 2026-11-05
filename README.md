@@ -26,3 +26,27 @@ Mode  | Key  | Action
 `n`  | `<leader>fs`  | Grep current string
 `n`  | `<leader>fc`  | Grep instances of the current file name without the extension
 `n`  | `<leader>fm`  | Find manpages
+
+## LSP
+
+Mode  | Key  | Action
+--- | --- | ---
+`n`  | `K`  | Hover info
+`n`  | `gd`  | Definition
+`n`  | `gD`  | Declaration
+`n`  | `gi`  | Go to implementation
+`n`  | `go`  | Go to type Definition
+`n`  | `gr`  | Show reference
+`n`  | `gs`  | Show signature help
+`n`  | `gl`  | Diagnostics in floating window
+`n`  | `<F2>`  | Rename symbole
+`n`  | `<F3>`  | Format code
+`n`  | `<F4>`  | Show code actions
+
+## LSP requirements on Arch
+
+```bash
+sudo pacman -S lua-language-server clang rust-analyzer gopls typescript-language-server
+```
+
+also can use npm for java and more
