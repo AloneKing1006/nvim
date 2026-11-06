@@ -1,3 +1,10 @@
+-- Custom filetypes
+vim.filetype.add({
+    extension = {
+        gotmpl = 'gotmpl',
+    },
+})
+
 -- Global LSP configuration
 vim.lsp.config('*', {
     root_markers = { '.git' },
@@ -16,10 +23,10 @@ vim.diagnostic.config({
     },
     signs = {
         text = {
-            [vim.diagnostic.severity.ERROR] = '✘',
-            [vim.diagnostic.severity.WARN] = '▲',
-            [vim.diagnostic.severity.HINT] = '⚑',
-            [vim.diagnostic.severity.INFO] = '»',
+            [vim.diagnostic.severity.ERROR] = '󰅚 ',
+            [vim.diagnostic.severity.WARN]  = '󰀪 ',
+            [vim.diagnostic.severity.INFO]  = '󰋽 ',
+            [vim.diagnostic.severity.HINT]  = '󰌵 ',
         },
     },
 })
@@ -34,14 +41,18 @@ function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
     opts.max_width = opts.max_width or 80
     opts.max_height = opts.max_height or 24
     opts.wrap = opts.wrap ~= false
+
     return orig(contents, syntax, opts, ...)
 end
 
 -- LSP attach
 vim.api.nvim_create_autocmd('LspAttach', {
-    group = vim.api.nvim_create_augroup('my.lsp', {}),
+    group = vim.api.nvim_create_augroup('my.lsp', { clear = true }),
     callback = function(args)
-        local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+        local client = assert(
+            vim.lsp.get_client_by_id(args.data.client_id)
+        )
+
         local buf = args.buf
 
         local map = function(mode, lhs, rhs)
@@ -65,20 +76,28 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
         -- Document highlight
         if client:supports_method('textDocument/documentHighlight') then
-            local highlight_augroup =
-                vim.api.nvim_create_augroup('my.lsp.highlight', { clear = false })
+            local highlight_augroup = vim.api.nvim_create_augroup(
+                'my.lsp.highlight.' .. buf,
+                { clear = true }
+            )
 
-            vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-                buffer = buf,
-                group = highlight_augroup,
-                callback = vim.lsp.buf.document_highlight,
-            })
+            vim.api.nvim_create_autocmd(
+                { 'CursorHold', 'CursorHoldI' },
+                {
+                    buffer = buf,
+                    group = highlight_augroup,
+                    callback = vim.lsp.buf.document_highlight,
+                }
+            )
 
-            vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-                buffer = buf,
-                group = highlight_augroup,
-                callback = vim.lsp.buf.clear_references,
-            })
+            vim.api.nvim_create_autocmd(
+                { 'CursorMoved', 'CursorMovedI' },
+                {
+                    buffer = buf,
+                    group = highlight_augroup,
+                    callback = vim.lsp.buf.clear_references,
+                }
+            )
         end
 
         -- Format on save
@@ -92,15 +111,28 @@ vim.api.nvim_create_autocmd('LspAttach', {
             and client:supports_method('textDocument/formatting')
             and not excluded_filetypes[vim.bo[buf].filetype]
         then
+            local format_augroup = vim.api.nvim_create_augroup(
+                'my.lsp.format.' .. buf,
+                { clear = true }
+            )
+
             vim.api.nvim_create_autocmd('BufWritePre', {
-                group = vim.api.nvim_create_augroup('my.lsp.format', { clear = false }),
+                group = format_augroup,
                 buffer = buf,
                 callback = function()
-                    vim.lsp.buf.format({
+                    -- Use only the first attached formatting client.
+                    local format_clients = vim.lsp.get_clients({
                         bufnr = buf,
-                        id = client.id,
-                        timeout_ms = 1000,
+                        method = 'textDocument/formatting',
                     })
+
+                    if #format_clients > 0 then
+                        vim.lsp.buf.format({
+                            bufnr = buf,
+                            id = format_clients[1].id,
+                            timeout_ms = 1000,
+                        })
+                    end
                 end,
             })
         end
@@ -114,17 +146,26 @@ local caps = require('cmp_nvim_lsp').default_capabilities()
 vim.lsp.config['luals'] = {
     cmd = { 'lua-language-server' },
     filetypes = { 'lua' },
-    root_markers = { { '.luarc.json', '.luarc.jsonc' }, '.git' },
+    root_markers = {
+        { '.luarc.json', '.luarc.jsonc' },
+        '.git',
+    },
     capabilities = caps,
     settings = {
         Lua = {
-            runtime = { version = 'LuaJIT' },
-            diagnostics = { globals = { 'vim' } },
+            runtime = {
+                version = 'LuaJIT',
+            },
+            diagnostics = {
+                globals = { 'vim' },
+            },
             workspace = {
                 checkThirdParty = false,
                 library = vim.api.nvim_get_runtime_file('', true),
             },
-            telemetry = { enable = false },
+            telemetry = {
+                enable = false,
+            },
         },
     },
 }
@@ -147,13 +188,16 @@ vim.lsp.config['clangd'] = {
 vim.lsp.config['rust_analyzer'] = {
     cmd = { 'rust-analyzer' },
     filetypes = { 'rust' },
-    root_markers = { 'Cargo.toml', 'rust-project.json', '.git' },
+    root_markers = {
+        'Cargo.toml',
+        'rust-project.json',
+        '.git',
+    },
     capabilities = caps,
     settings = {
         ['rust-analyzer'] = {
-            cargo = { allFeatures = true },
-            formatting = {
-                command = { 'rustfmt' },
+            cargo = {
+                allFeatures = true,
             },
         },
     },
@@ -162,8 +206,17 @@ vim.lsp.config['rust_analyzer'] = {
 -- Go
 vim.lsp.config['gopls'] = {
     cmd = { 'gopls' },
-    filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
-    root_markers = { 'go.mod', 'go.work', '.git' },
+    filetypes = {
+        'go',
+        'gomod',
+        'gowork',
+        'gotmpl',
+    },
+    root_markers = {
+        'go.mod',
+        'go.work',
+        '.git',
+    },
     capabilities = caps,
     settings = {
         gopls = {
@@ -179,14 +232,15 @@ vim.lsp.config['gopls'] = {
 
 -- JavaScript / TypeScript
 vim.lsp.config['ts_ls'] = {
-    cmd = { 'typescript-language-server', '--stdio' },
+    cmd = {
+        'typescript-language-server',
+        '--stdio',
+    },
     filetypes = {
         'javascript',
         'javascriptreact',
-        'javascript.jsx',
         'typescript',
         'typescriptreact',
-        'typescript.tsx',
     },
     root_markers = {
         'package.json',
