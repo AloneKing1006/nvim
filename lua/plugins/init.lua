@@ -12,18 +12,3 @@ vim.pack.add({
     "https://github.com/mbbill/undotree",
     "https://github.com/hrsh7th/cmp-nvim-lsp",
 })
-
--- tokyonight
-require("plugins.colors")
--- lualine statusline
-require("plugins.lualine")
--- color highlighting
-require("plugins.color-highlight")
--- native treesitter
-require("plugins.treesitter")
--- completion
-require("plugins.cmp")
--- telescope
-require("plugins.telescope")
--- lsp
-require("plugins.lsp")
